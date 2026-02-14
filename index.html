@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Valentine ❤️</title>
 
 <style>
@@ -49,8 +50,6 @@ body{
   font-size:30px;
 }
 
-/* BUTTONS */
-
 .buttons{
   margin-top:35px;
 }
@@ -78,7 +77,7 @@ button{
   color:white;
 }
 
-/* POPUP CINEMATIC */
+/* POPUP */
 
 .popup{
   position:fixed;
@@ -117,21 +116,6 @@ button{
   }
 }
 
-/* HEART PARTICLES */
-
-.heart{
-  position:fixed;
-  font-size:22px;
-  animation: floatUp 2s linear forwards;
-}
-
-@keyframes floatUp{
-  to{
-    transform:translateY(-220px);
-    opacity:0;
-  }
-}
-
 /* CONFETTI */
 
 .confetti{
@@ -147,6 +131,21 @@ button{
   }
 }
 
+/* HEARTS */
+
+.heart{
+  position:fixed;
+  font-size:22px;
+  animation: floatUp 2s linear forwards;
+}
+
+@keyframes floatUp{
+  to{
+    transform:translateY(-220px);
+    opacity:0;
+  }
+}
+
 </style>
 </head>
 
@@ -156,7 +155,7 @@ button{
     <h2>Will you be my Valentine? 💖</h2>
 
     <div class="buttons">
-        <button id="yesBtn">Yes &#x1FAF6;</button>
+        <button id="yesBtn">Yes 🫶</button>
         <button id="noBtn">No 😢</button>
     </div>
 </div>
@@ -166,6 +165,11 @@ button{
         <h1>🎉 SHE SAID YES! 🎉</h1>
         <p>I knew it… saying YES was your only option 😌❤️</p>
         <p><b>No cancellation allowed.</b></p>
+
+        <button onclick="closePopup()" 
+        style="margin-top:20px;padding:10px 20px;border:none;border-radius:10px;background:#ff4d6d;color:white;cursor:pointer;">
+        Close ❤️
+        </button>
     </div>
 </div>
 
@@ -176,10 +180,9 @@ const noBtn = document.getElementById("noBtn");
 const popup = document.getElementById("popup");
 
 let hoverCount = 0;
-let lastX = 0;
-let lastY = 0;
+let previousPositions = [];
 
-/* NO BUTTON DIALOGUES */
+/* SMART NO BUTTON */
 
 const noTexts = [
 "Stop chasing me 😈",
@@ -187,10 +190,10 @@ const noTexts = [
 "Try harder 😂",
 "You can't catch me!",
 "Almost!",
-"The answer is YES anyway 😉"
+"Just click YES already ❤️"
 ];
 
-noBtn.addEventListener("mouseover", () => {
+noBtn.addEventListener("mouseenter", () => {
 
     if(hoverCount < noTexts.length){
         noBtn.innerText = noTexts[hoverCount];
@@ -206,16 +209,28 @@ noBtn.addEventListener("mouseover", () => {
     const maxX = card.clientWidth - noBtn.offsetWidth;
     const maxY = card.clientHeight - noBtn.offsetHeight;
 
-    let newX, newY, distance;
+    let newX, newY;
+    let safe = false;
+    let attempts = 0;
 
-    do{
+    while(!safe && attempts < 40){
+
         newX = Math.random() * maxX;
         newY = Math.random() * maxY;
-        distance = Math.hypot(newX - lastX, newY - lastY);
-    }while(distance < 120);
 
-    lastX = newX;
-    lastY = newY;
+        safe = previousPositions.every(pos => {
+            const dist = Math.hypot(newX - pos.x, newY - pos.y);
+            return dist > 130;
+        });
+
+        attempts++;
+    }
+
+    previousPositions.push({x:newX, y:newY});
+
+    if(previousPositions.length > 6){
+        previousPositions.shift();
+    }
 
     noBtn.style.left = newX + "px";
     noBtn.style.top = newY + "px";
@@ -226,7 +241,7 @@ noBtn.addEventListener("mouseover", () => {
 });
 
 
-/* YES CLICK MAGIC */
+/* POPUP */
 
 yesBtn.addEventListener("click", () => {
 
@@ -236,6 +251,19 @@ yesBtn.addEventListener("click", () => {
 
 });
 
+function closePopup(){
+    popup.classList.remove("show");
+}
+
+/* close when clicking outside */
+popup.addEventListener("click", (e)=>{
+    if(e.target === popup){
+        closePopup();
+    }
+});
+
+
+/* CONFETTI */
 
 function createConfetti(){
     for(let i=0;i<120;i++){
@@ -251,6 +279,8 @@ function createConfetti(){
         setTimeout(()=>confetti.remove(),3000);
     }
 }
+
+/* HEARTS */
 
 function createHearts(){
     for(let i=0;i<30;i++){
@@ -272,4 +302,3 @@ function createHearts(){
 
 </body>
 </html>
-
